@@ -35,11 +35,6 @@ namespace AppreciationApp.Web.Repository
 
                 foreach (var highFive in result.results)
                 {
-                    //IEnumerable<string>
-                    //var numberOfRecipients = highFive.text.Count(x => x.Contains("@")).Cast(IEnumerable<string>);
-                    //var recipientDefiner = "@";
-
-                    //Convert highFive text to manage-able string
                     var text = highFive.text.ToString();
                     dynamic textSplit;
                     while (text.Contains("@"))
