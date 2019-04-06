@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using AppreciationApp.Web.Models;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Regex;
 
 namespace AppreciationApp.Web.Repository
 {
@@ -13,16 +14,17 @@ namespace AppreciationApp.Web.Repository
     {
         public List<HighFives> GetWeeklyHighFives()
         {
-            var APIKey = ""; //API Key Goes Here. Don't add it to the repo
+            var APIKey = "9255ef32f33648c3b5cf84e111fbe53a"; //API Key Goes Here. Don't add it to the repo
             var url = @"https://theleadagency.15five.com/api/public/high-five/";
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", APIKey);
             
             UriBuilder builder = new UriBuilder(url);
-            var Saturday = StartOfWeek(DateTime.Today, DayOfWeek.Saturday);
-            builder.Query = "created_on_start=" + Saturday.ToString("yyyy-MM-dd");
+            var dayFrom = StartOfWeek(DateTime.Today, DayOfWeek.Monday);
+            builder.Query = "created_on_start=" + dayFrom.ToString("yyyy-MM-dd");
             
             var response = client.GetAsync(builder.Uri).Result;
+
             if (response.IsSuccessStatusCode)
             {
                 var responseResults = response.Content.ReadAsStringAsync().Result;
@@ -31,41 +33,73 @@ namespace AppreciationApp.Web.Repository
                 var highFives = new List<HighFives>();
 
                 //Initialise list of recipients
-                List<string> recipientsList = new List<string>();         
+                List<string> recipientsList = new List<string>();
+                
 
                 foreach (var highFive in result.results)
                 {
-                    var text = highFive.text.ToString();
-                    dynamic textSplit;
-                    while (text.Contains("@"))
+                    var highFiveMessage = highFive.text.ToString();
+                    dynamic textSplit = "";
+                    var recipient = "";
+
+                    while (highFiveMessage.Contains("@"))
                     {
-                        //Split text to find recipient
-                        textSplit = text.Split(new[] { '@', ' ' }, 3);
-                        text = textSplit[2];
-                        var recipient = textSplit[1].ToString();
-                        //Add recipient to list
-                        if (!string.IsNullOrEmpty(recipient))
-                        {
-                            recipientsList.Add(recipient);
-                        }                        
+                        //Split text to find recipients - 
+                        var splitHighFive = SplitHighFive(textSplit, highFiveMessage, recipient);
+                        highFiveMessage = splitHighFive.Item1; //"For doing a great job at x, y, z"
+                        recipient = splitHighFive.Item2; //"BobRoss"
+                        //Space
+                        recipient = SpaceApartName(recipient); //"Bob Ross"
+                        //Populate recipientsList
+                        recipientsList = PopulateList(recipientsList, recipient);     
                     }
 
-                    var receivers = "Welldone to: ";
+                    var recipients = "Welldone to: ";
                     foreach (var receiver in recipientsList)
                     {
-                        receivers = receivers + receiver + ", ";
+                        recipients = recipients + receiver + ", ";
                     }
-                    receivers = receivers.TrimEnd(',', ' ');
+                    recipients = recipients.TrimEnd(',', ' ');
+
+
                     highFives.Add(new HighFives()
                     {
-                     AppreciatedUser = receivers,
-                     Message   = text
+                     AppreciatedUser = recipients,
+                     Message   = highFiveMessage
                     });
                 }
                 return highFives;
             }
 
             throw new Exception("Request to 15Five was unsuccessful");
+        }
+
+        private List<string> PopulateList(List<string> recipientsList, string recipient)
+        {
+            if (!string.IsNullOrEmpty(recipient))
+            {
+                recipientsList.Add(recipient);
+            }
+
+            return recipientsList;
+        }
+
+        private string SpaceApartName(string recipient)
+        {
+            var r = new Regex(@"(?<=[A-Z])(?=[A-Z][a-z]) |
+                         (?<=[^A-Z])(?=[A-Z]) |
+                         (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace);
+
+            return recipient = r.Replace(recipient, " ");
+        }
+
+        private Tuple<string, object> SplitHighFive(dynamic textSplit, dynamic highFiveMessage, object recipient)
+        {
+            textSplit = highFiveMessage.Split(new[] { '@', ' ' }, 3);
+            highFiveMessage = textSplit[2];
+            recipient = textSplit[1].ToString();
+
+            return new Tuple<string, object>(highFiveMessage, recipient);
         }
 
         public static DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
