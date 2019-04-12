@@ -42,6 +42,8 @@ namespace AppreciationApp.Web.Repository
                     dynamic textSplit = "";
                     var recipient = "";
 
+                    var copyOfHighFive = highFiveMessage;
+
                     while (highFiveMessage.Contains("@"))
                     {
                         //Split text to find recipients - 
@@ -54,17 +56,15 @@ namespace AppreciationApp.Web.Repository
                         recipientsList = PopulateList(recipientsList, recipient);     
                     }
 
-                    var recipients = "Welldone to: ";
-                    foreach (var receiver in recipientsList)
-                    {
-                        recipients = recipients + receiver + ", ";
+                    string taggedUserPattern = @"(^[@]\w+)";
+                    foreach(var receiver in recipientsList)
+                    {                        
+                        highFiveMessage = Regex.Replace(copyOfHighFive, taggedUserPattern, receiver);
                     }
-                    recipients = recipients.TrimEnd(',', ' ');
 
-
+                    recipientsList.Clear();
                     highFives.Add(new HighFives()
                     {
-                     AppreciatedUser = recipients,
                      Message   = highFiveMessage
                     });
                 }
