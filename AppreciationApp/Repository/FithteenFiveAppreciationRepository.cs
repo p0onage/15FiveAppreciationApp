@@ -12,8 +12,6 @@ namespace AppreciationApp.Web.Repository
 {
     public class FifteenFiveAppreciationRepository : IFifteenFiveAppreciationRepository
     {
-        public string taggedUserPattern = @"(^[@]\w+)";
-
         public List<HighFives> GetWeeklyHighFives()
         {
             var APIKey = "9255ef32f33648c3b5cf84e111fbe53a"; //API Key Goes Here. Don't add it to the repo
@@ -42,36 +40,14 @@ namespace AppreciationApp.Web.Repository
                 {
                     var highFiveMessage = highFive.text.ToString();
                     dynamic textSplit = "";
-                    var recipient = "";
 
                     var copyOfHighFive = highFiveMessage;
 
-                    while (MoreUneditedRecipients(highFiveMessage))
-                    {
-                        //Split text to find recipients - 
-                        var splitHighFive = SplitHighFive(textSplit, highFiveMessage, recipient);
-                        highFiveMessage = splitHighFive.Item1; //"For doing a great job at x, y, z"
-                        recipient = splitHighFive.Item2; //"BobRoss"
-                        //Space
-                        recipient = SpaceApartName(recipient); //"Bob Ross"
-                        //Populate recipientsList
-                        recipientsList = PopulateList(recipientsList, recipient);
+                    while (UneditedRecipients(highFiveMessage))
+                    {                       
+                        highFiveMessage = SpaceApartNames(highFiveMessage);
                     }
 
-                    //Replace '@UserName' with 'User Name'
-                    foreach (var receiver in recipientsList)
-                    {
-                        var test = Regex.Matches(copyOfHighFive, taggedUserPattern);
-                        //highFiveMessage = Regex.Replace(copyOfHighFive, taggedUserPattern, receiver);
-                        MatchEvaluator evaluator = delegate (Match match)
-                           {
-                               return receiver;
-                           };
-                        highFiveMessage = System.Regex.Regex.Replace(copyOfHighFive, taggedUserPattern, evaluator);
-                        bool stoptest = true;
-                    }
-
-                    recipientsList.Clear();
                     highFives.Add(new HighFives()
                     {
                         Message = highFiveMessage
@@ -93,19 +69,11 @@ namespace AppreciationApp.Web.Repository
             return recipientsList;
         }
 
-        private string SpaceApartName(string recipient)
+        private string SpaceApartNames(string message)
         {
-            return recipient = Regex.Replace(recipient, "([a-z])([A-Z])", "$1 $2");
-        }
+            message = Regex.Replace(message, "[@]", "");
 
-        private Tuple<string, object> SplitHighFive(dynamic textSplit, dynamic highFiveMessage, object recipient)
-        {
-            var testsplit = Regex.Split(highFiveMessage, taggedUserPattern);
-            textSplit = highFiveMessage.Split(new[] { '@', ' ' }, 3);
-            highFiveMessage = textSplit[2];
-            recipient = textSplit[1].ToString();
-
-            return new Tuple<string, object>(highFiveMessage, recipient);
+            return message = Regex.Replace(message, "([a-z])([A-Z])", "$1 $2");
         }
 
         public static DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
@@ -114,11 +82,9 @@ namespace AppreciationApp.Web.Repository
             return dt.AddDays(-1 * diff).Date;
         }
 
-
-
-        public bool MoreUneditedRecipients(dynamic highFiveMessage)
+        public bool UneditedRecipients(dynamic highFiveMessage)
         {
-            Match match = Regex.Match(highFiveMessage, @"(^@\w+)");
+            Match match = Regex.Match(highFiveMessage, @"(@\w+)");
             if (match.Success)
             {
                 return true;
