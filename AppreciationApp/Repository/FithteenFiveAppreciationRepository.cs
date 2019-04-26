@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using AppreciationApp.Web.Models;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Regex;
 
 namespace AppreciationApp.Web.Repository
 {
@@ -17,12 +18,13 @@ namespace AppreciationApp.Web.Repository
             var url = @"https://theleadagency.15five.com/api/public/high-five/";
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", APIKey);
-            
+
             UriBuilder builder = new UriBuilder(url);
-            var Saturday = StartOfWeek(DateTime.Today, DayOfWeek.Saturday);
-            builder.Query = "created_on_start=" + Saturday.ToString("yyyy-MM-dd");
-            
+            var dayFrom = StartOfWeek(DateTime.Today, DayOfWeek.Monday);
+            builder.Query = "created_on_start=" + dayFrom.ToString("yyyy-MM-dd");
+
             var response = client.GetAsync(builder.Uri).Result;
+
             if (response.IsSuccessStatusCode)
             {
                 var responseResults = response.Content.ReadAsStringAsync().Result;
@@ -31,40 +33,24 @@ namespace AppreciationApp.Web.Repository
                 var highFives = new List<HighFives>();
 
                 //Initialise list of recipients
-                List<string> recipientsList = new List<string>();         
+                List<string> recipientsList = new List<string>();
+
 
                 foreach (var highFive in result.results)
                 {
-                    //IEnumerable<string>
-                    //var numberOfRecipients = highFive.text.Count(x => x.Contains("@")).Cast(IEnumerable<string>);
-                    //var recipientDefiner = "@";
+                    var highFiveMessage = highFive.text.ToString();
+                    dynamic textSplit = "";
 
-                    //Convert highFive text to manage-able string
-                    var text = highFive.text.ToString();
-                    dynamic textSplit;
-                    while (text.Contains("@"))
-                    {
-                        //Split text to find recipient
-                        textSplit = text.Split(new[] { '@', ' ' }, 3);
-                        text = textSplit[2];
-                        var recipient = textSplit[1].ToString();
-                        //Add recipient to list
-                        if (!string.IsNullOrEmpty(recipient))
-                        {
-                            recipientsList.Add(recipient);
-                        }                        
+                    var copyOfHighFive = highFiveMessage;
+
+                    while (UneditedRecipients(highFiveMessage))
+                    {                       
+                        highFiveMessage = SpaceApartNames(highFiveMessage);
                     }
 
-                    var receivers = "Welldone to: ";
-                    foreach (var receiver in recipientsList)
-                    {
-                        receivers = receivers + receiver + ", ";
-                    }
-                    receivers = receivers.TrimEnd(',', ' ');
                     highFives.Add(new HighFives()
                     {
-                     AppreciatedUser = receivers,
-                     Message   = text
+                        Message = highFiveMessage
                     });
                 }
                 return highFives;
@@ -73,10 +59,38 @@ namespace AppreciationApp.Web.Repository
             throw new Exception("Request to 15Five was unsuccessful");
         }
 
+        private List<string> PopulateList(List<string> recipientsList, string recipient)
+        {
+            if (!string.IsNullOrEmpty(recipient))
+            {
+                recipientsList.Add(recipient);
+            }
+
+            return recipientsList;
+        }
+
+        private string SpaceApartNames(string message)
+        {
+            message = Regex.Replace(message, "[@]", "");
+
+            return message = Regex.Replace(message, "([a-z])([A-Z])", "$1 $2");
+        }
+
         public static DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
         {
             int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
             return dt.AddDays(-1 * diff).Date;
+        }
+
+        public bool UneditedRecipients(dynamic highFiveMessage)
+        {
+            Match match = Regex.Match(highFiveMessage, @"(@\w+)");
+            if (match.Success)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 
