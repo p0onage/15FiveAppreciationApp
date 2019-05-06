@@ -41,8 +41,6 @@ namespace AppreciationApp.Web.Repository
                     var highFiveMessage = highFive.text.ToString();
                     dynamic textSplit = "";
 
-                    var copyOfHighFive = highFiveMessage;
-
                     while (UneditedRecipients(highFiveMessage))
                     {                       
                         highFiveMessage = SpaceApartNames(highFiveMessage);
@@ -85,12 +83,8 @@ namespace AppreciationApp.Web.Repository
         public bool UneditedRecipients(dynamic highFiveMessage)
         {
             Match match = Regex.Match(highFiveMessage, @"(@\w+)");
-            if (match.Success)
-            {
-                return true;
-            }
 
-            return false;
+            return match.Success;
         }
     }
 
