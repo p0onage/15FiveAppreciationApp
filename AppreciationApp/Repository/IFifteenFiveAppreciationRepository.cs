@@ -9,6 +9,6 @@ namespace AppreciationApp.Web.Repository
         /// Gets the weekly high fives.
         /// </summary>
         /// <returns>List of weekly high fives given out this week</returns>
-        List<HighFives> GetWeeklyHighFives();
+        dynamic GetWeeklyHighFives();
     }
 }

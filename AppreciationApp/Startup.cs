@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using AppreciationApp.Web.Services;
+using AppreciationApp.Web.Services.Interfaces;
+using AppreciationApp.Web.Clients;
+using AppreciationApp.Web.Clients.Interfaces;
 
 namespace AppreciationApp.Web
 {
@@ -21,6 +25,8 @@ namespace AppreciationApp.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IFifteenFiveAppreciationRepository, FifteenFiveAppreciationRepository>();
+            services.AddSingleton<IAppreciationService, AppreciationService>();
+            services.AddSingleton<IAppreciationAPIClient, AppreciationAPIClient>();
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
