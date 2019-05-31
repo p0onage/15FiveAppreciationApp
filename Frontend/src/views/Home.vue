@@ -1,9 +1,8 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld :msg='msg'/>
     <h1>{{highFives[0].message}}</h1>
-    <button @click="removeItem()">Next</button>
+    <button @click="removeItem()">Good job!</button>
   </div>
 </template>
 
@@ -22,9 +21,9 @@ export default class Home extends Vue {
   private url = "https://localhost:44343/api/appreciation"
   //private AppreciationAPIService = Axios.get<IAppreciationAPIService>(this.url).then(response => console.log(response));
 
-   public removeItem(){
-     this.highFives.shift();
-   }
+  public removeItem(){
+    this.highFives.shift();
+  }
 
   public async created() {
     this.highFives = await container.get<IAppreciationAPIService>(AppreciationAPIService).returnHighFives();
