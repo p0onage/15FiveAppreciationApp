@@ -19,7 +19,7 @@ namespace AppreciationApp.Web.Controllers.API
         {
             this.appreciationService = appreciationService;
         }
-        public async Task<List<AppreciationViewModel>> Get15FiveAppreciations([FromQuery]string postcode)
+        public List<AppreciationViewModel> Get15FiveAppreciations([FromQuery]string postcode)
         {
             var highfives = appreciationService.GetAppreciations();
             var AppreciationViewModel = new List<AppreciationViewModel>();
