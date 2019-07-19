@@ -1,8 +1,8 @@
 <template>
-  <div class="home">
+  <div class="container">
     <img alt="Vue logo" src="../assets/logo.png">
-    <h1>{{highFives[0].message}}</h1>
-    <button @click="removeItem()">Good job!</button>
+    <h1 class="container__highfive">{{highFives[0].message}}</h1>
+    <button class="button" @click="removeItem()">Good job!</button>
   </div>
 </template>
 
@@ -30,3 +30,7 @@ export default class Home extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  @import '../styles/main.scss';
+</style>
