@@ -1,9 +1,25 @@
 <template>
+<div>
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <header class="header">
+    <div class="header__column">
+      <h2 class="header__header">Most High Fives Given</h2>
+      <h2>Mark Boyle</h2>
+      <h2>5</h2>
+    </div>
+    <div class="header__column header__logo"><img width="238" src="../assets/tla-logo.png"></div>
+    <div class="header__column">
+      <h2 class="header__header">Most High Fives Recieved</h2>
+      <h2>Alan How</h2>
+      <h2>7</h2>
+    </div>
+</header>
   <div class="container">
     <img alt="Vue logo" src="../assets/logo.png">
-    <h1 class="container__highfive">{{highFives[0].message}}</h1>
+    <h1>{{highFives[0].message}}</h1>
     <button class="button" @click="removeItem()">Good job!</button>
   </div>
+</div>
 </template>
 
 <script lang="ts">
