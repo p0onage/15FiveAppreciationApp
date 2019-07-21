@@ -16,7 +16,8 @@
 </header>
   <div class="container">
     <img alt="Vue logo" src="../assets/logo.png">
-    <h1>{{highFives[0].message}}</h1>
+    <h1>{{highFives[0].message}}</h1><br/>
+    <h1>From: {{highFives[0].username}}</h1>
     <button class="button" @click="removeItem()">Good job!</button>
   </div>
 </div>
@@ -41,8 +42,18 @@ export default class Home extends Vue {
     this.highFives.shift();
   }
 
+  public shuffleHighFives() {
+  for (let i = this.highFives.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [this.highFives[i], this.highFives[j]] = [this.highFives[j], this.highFives[i]];
+    }
+
+  return this.highFives;
+}
+
   public async created() {
     this.highFives = await container.get<IAppreciationAPIService>(AppreciationAPIService).returnHighFives();
+    this.shuffleHighFives();
   }
 }
 </script>

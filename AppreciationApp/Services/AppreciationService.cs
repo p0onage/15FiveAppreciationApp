@@ -29,6 +29,7 @@ namespace AppreciationApp.Web.Services
             foreach (var highFive in result.results)
             {
                 var highFiveMessage = highFive.text.ToString();
+                var appreciator = highFive.creator_details.full_name.ToString();
                 dynamic textSplit = "";
 
                 var copyOfHighFive = highFiveMessage;
@@ -40,7 +41,8 @@ namespace AppreciationApp.Web.Services
 
                 highFives.Add(new HighFives()
                 {
-                    Message = highFiveMessage
+                    Message = highFiveMessage,
+                    AppreciatedUser = appreciator
                 });
             }
             return highFives;

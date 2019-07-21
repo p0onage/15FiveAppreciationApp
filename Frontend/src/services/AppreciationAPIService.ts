@@ -8,6 +8,7 @@ export default class AppreciationAPIService implements IAppreciationAPIService {
     private apiDomain: string = 'https://localhost:44343/api/appreciation';
 
     public returnHighFives(): Promise<Appreciation[]> {
+      debugger;
         return fetch(
           `${this.apiDomain}`,
           {
