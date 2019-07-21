@@ -4,6 +4,10 @@
     align-items: center;
     flex-direction: column;
 
+    > * {
+        margin: 10px;
+    }
+
     &:before {
         background-image: url("../img/OfficeView.jpeg");
         background-repeat: no-repeat;
