@@ -42,7 +42,6 @@
             flex-direction: column;
             min-height: 118px;
             width: 100%;
-            // background-color: white;
             padding: 20px;
             align-items: center;
         }
@@ -59,6 +58,13 @@
                 border-bottom: 1px solid red;
             }
         }
+}
+
+.total-high-fives {
+    position: absolute;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
 }
 
 * {

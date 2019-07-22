@@ -19,6 +19,10 @@
     <h1>{{highFives[0].message}}</h1><br/>
     <h1>From: {{highFives[0].username}}</h1>
     <button class="button" @click="removeItem()">Good job!</button>
+    <div class="total-high-fives">
+      <h2 class="header__header">Total High Fives</h2>
+      <h2>{{hightFiveAmount}}</h2>
+    </div>
   </div>
 </div>
 </template>
@@ -35,6 +39,7 @@ import Appreciation from '@/models/Appreciation';
 @Component
 export default class Home extends Vue {
   private highFives: Appreciation[] = [];
+  private hightFiveAmount: number = 0;
   private url = "https://localhost:44343/api/appreciation"
   //private AppreciationAPIService = Axios.get<IAppreciationAPIService>(this.url).then(response => console.log(response));
 
@@ -54,6 +59,7 @@ export default class Home extends Vue {
   public async created() {
     this.highFives = await container.get<IAppreciationAPIService>(AppreciationAPIService).returnHighFives();
     this.shuffleHighFives();
+    this.hightFiveAmount = this.highFives.length;
   }
 }
 </script>
