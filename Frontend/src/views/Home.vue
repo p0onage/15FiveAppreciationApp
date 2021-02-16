@@ -1,58 +1,69 @@
 <template>
-  <div class="home">
+<div>
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <header class="header">
+    <div class="header__column">
+      <h2 class="header__header">Most High Fives Given</h2>
+      <h2>Mark Boyle</h2>
+      <h2>5</h2>
+    </div>
+    <div class="header__column header__logo"><img width="238" src="../assets/tla-logo.png"></div>
+    <div class="header__column">
+      <h2 class="header__header">Most High Fives Recieved</h2>
+      <h2>Alan How</h2>
+      <h2>7</h2>
+    </div>
+</header>
+  <div class="container">
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld :msg='msg'/>
-    <p v-if="appreciations != null">{{appreciations}}</p>
-    <button v-on:click="$adal.login()" >Sign In</button>
-    <button v-on:click="$adal.logout()" >Sign Out</button>
-    <button v-if="$adal.isAuthenticated()" v-on:click="getAppreciations()" >Get Appreciations</button>
-    <div v-if="$adal.checkRoles(['Admin'])">You're also an admin</div>
-    <div v-if="$adal.isAuthenticated()">You are signed in!</div>
-    <div v-if="!$adal.checkRoles(['Admin'])">You're not an admin</div>
+    <h1>{{highFives[0].message}}</h1><br/>
+    <h1>From: {{highFives[0].username}}</h1>
+    <button class="button" @click="removeItem()">Good job!</button>
+    <div class="total-high-fives">
+      <h2 class="header__header">Total High Fives</h2>
+      <h2>{{hightFiveAmount}}</h2>
+    </div>
   </div>
+</div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 import Axios from 'axios';
+import IAppreciationAPIService from '../services/Interfaces/IAppreciationAPIService';
+import AppreciationAPIService from '../services/AppreciationAPIService';
+import container from '../inversify.config';
+import Appreciation from '@/models/Appreciation';
 
-@Component({
-  components: {
-    HelloWorld
-  },
-  data () {
-    return {
-      msg: "Signing in...",
-      appreciations: null
-    }
-  },
-  async created () {
-    if (this.$adal.isAuthenticated()) {
-      this.msg = "Hello, " + this.$adal.user.profile.given_name 
+@Component
+export default class Home extends Vue {
+  private highFives: Appreciation[] = [];
+  private hightFiveAmount: number = 0;
+  private url = "https://localhost:44343/api/appreciation"
+  //private AppreciationAPIService = Axios.get<IAppreciationAPIService>(this.url).then(response => console.log(response));
 
-      let userInfo = await this.getUserInfo()
-      this.msg += '. It looks like your email address is ' + userInfo.mail + ' according to the Graph API'
-    } else {
-      this.msg = "Please sign in"
-    }
-  },
-
-  methods: {
-    async getUserInfo () {
-      let res = await this.$graphApi.get(`me`, {
-        params: {
-          'api-version': 1.6
-        }
-      })
-      console.log(res)
-      return res.data
-    },
-    async getAppreciations (){
-      Axios.get("http://localhost:7071/api/Appreciations?daysToLookBack=7")
-      .then(Response => (this.$data.appreciations = Response))
-    }
+  public removeItem(){
+    this.highFives.shift();
   }
-})
-export default class Home extends Vue {}
+
+  public shuffleHighFives() {
+  for (let i = this.highFives.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [this.highFives[i], this.highFives[j]] = [this.highFives[j], this.highFives[i]];
+    }
+
+  return this.highFives;
+}
+
+  public async created() {
+    this.highFives = await container.get<IAppreciationAPIService>(AppreciationAPIService).returnHighFives();
+    this.shuffleHighFives();
+    this.hightFiveAmount = this.highFives.length;
+  }
+}
 </script>
+
+<style lang="scss" scoped>
+  @import '../styles/main.scss';
+</style>
